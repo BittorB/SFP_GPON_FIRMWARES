@@ -1,0 +1,79 @@
+root@hl_gsfp_001:~# fw_printenv 
+act_img_addr=0xBF20003C
+activate_image=-1
+addip=setenv bootargs ${bootargs} ip=${ipaddr}:${serverip}:${gatewayip}:${netmask}:${hostname}:${netdev}:off
+addmtdparts0=setenv mtdparts mtdparts=sflash:256k(uboot)ro,128k(uboot_env),3904k(linux),3904k(image1)
+addmtdparts1=setenv mtdparts mtdparts=sflash:256k(uboot)ro,128k(uboot_env),3904k(image0),3904k(linux)
+asc0=0
+boot_image=run boot_image${c_img};
+boot_image0=run kernel0_from_sf flashargs addip addmtdparts0 addmisc && bootm ${ram_addr}
+boot_image1=run kernel1_from_sf flashargs addip addmtdparts1 addmisc && bootm ${ram_addr}
+boot_image_err=setenv kernel_offs ${kernel0_offs};httpd && setenv image0_is_valid 1
+bootargs=rootfstype=squashfs,jffs2 ip=192.168.77.154:192.168.77.153:192.168.77.1:255.255.255.252:::off ethaddr=00:1b:c5:11:11:31 machtype=HL_GSFP_001 vpe1_load_addr=0x83f00000 vpe1_mem=1M mem=63M mtdparts=sflash:256k(uboot)ro,128k(uboot_env),3904k(linux),3904k(image1) quiet console=ttyLTQ0,115200 init=/etc/preinit
+bootcmd=run flash_flash
+bootdelay=2
+c_img=0
+env_offs=0x40000
+env_offs_redund=0x50000
+ethact=SERDES
+ethprime=SERDES
+ethrotate=no
+fileaddr=80f00000
+filesize=340004
+flash_flash=run select_image boot_image
+flashargs=setenv bootargs rootfstype=squashfs,jffs2
+image0_addr=0xB0060000
+image1_addr=0xB0430000
+image_name=openwrt-lantiq-falcon-HL_GSFP_001
+import_uboot_env=env import -t ${ram_addr} ${filesize}
+ipaddr=192.168.77.154
+kernel0_from_sf=sf probe 0;sf read ${ram_addr} ${kernel0_offs} ${max_kernel_size}
+kernel0_offs=0x60000
+kernel1_from_sf=sf probe 0;sf read ${ram_addr} ${kernel1_offs} ${max_kernel_size}
+kernel1_offs=0x430000
+load_uboot=tftpboot ${ram_addr} ${tftppath}${uboot_image_name}
+load_uboot_env=tftp ${ram_addr} ${tftppath}u-boot.env
+load_uboot_env_y=loady ${ram_addr}
+machtype=HL_GSFP_001
+magic_addr=0xBF200038
+magic_val=0xDEADBEEF
+max_kernel_size=180000
+mtdparts=mtdparts=sflash:256k(uboot)ro,128k(uboot_env),3904k(linux),3904k(image1)
+netconsole=set stderr nulldev;set stdin nc,serial;set stdout nc,serial
+netmask=255.255.255.252
+omci_iop_mask=0x00000008
+omci_loid=loid
+omci_lpwd=lpasswd
+ram_addr=80F00000
+reset_uboot_env=env default -f -a; saveenv
+save_uboot=sf probe 0;sf erase 0 40000;sf write ${ram_addr} 0 ${filesize}
+select_image=if test -n $committed_image ; then else setenv committed_image _err;saveenv;fi;if test -n $image0_is_valid ; then else setenv image0_is_valid 1;saveenv;fi;if test -n $image1_is_valid ; then else setenv image1_is_valid 0;saveenv;fi;setenv activate_image -1;if itest *${magic_addr} == ${magic_val} ; then if itest *${act_img_addr} == 0 ; then setenv activate_image 0;fi;if itest *${act_img_addr} == 1 ; then setenv activate_image 1;fi;mw ${magic_addr} 0x0;mw ${act_img_addr} 0x0;fi;if test $activate_image = -1 ; then setenv c_img $committed_image;else setenv c_img $activate_image;setenv activate_image -1;fi;if test $c_img = 0 && test $image0_is_valid = 0 ; then setenv c_img 1;fi;if test $c_img = 1 && test $image1_is_valid = 0 ; then setenv c_img 0;fi;if test $image0_is_valid = 0 && test $image1_is_valid = 0 ; then setenv c_img _err;fi;exit 0
+serverip=192.168.77.153
+start_netconsole=if test -n ${ncip}; then echo 'check for netconsole'; if ping ${ncip}; then run netconsole; echo 'netconsole enabled'; fi; fi
+stderr=serial
+stdin=serial
+stdout=serial
+uboot_image_name=hl_gsfp_001_u-boot.img
+update_image0=tftpboot ${ram_addr} ${tftppath}${image_name}-squashfs.image;sf probe 0;sf erase ${kernel0_offs} +${filesize};sf write ${ram_addr} ${kernel0_offs} ${filesize}
+update_image1=tftpboot ${ram_addr} ${tftppath}${image_name}-squashfs.image;sf probe 0;sf erase ${kernel1_offs} +${filesize};sf write ${ram_addr} ${kernel1_offs} ${filesize}
+update_sfp=run update_system
+update_system=run update_image0 && setenv committed_image 0 && setenv image0_is_valid 1 && saveenv
+update_system_y=run update_image_y && setenv committed_image 0 && setenv image0_is_valid 1 && saveenv
+update_uboot=run load_uboot && run save_uboot
+update_uboot_env=run load_uboot_env && run import_uboot_env && saveenv
+update_uboot_env_y=run load_uboot_env_y && run import_uboot_env && saveenv
+update_uboot_y=loady ${ram_addr} && run save_uboot
+ver=HL_GSFP_001_UBOOT_1.0.0 2018.11.27-09:25:21
+preboot=echo
+baudrate=10
+image0_is_valid=1
+addmisc=setenv bootargs ${bootargs} ethaddr=${ethaddr} machtype=${machtype} vpe1_load_addr=0x83f00000 vpe1_mem=1M mem=63M ${mtdparts} quiet console=ttyLTQ0,${baudrate} init=/etc/preinit
+image0_version=V1.0.9
+goi_config=begin-base64 644 goi_config@H4sIAPf/rlwCA+0Z2XLixtav8VcolQdeYk2vWq4qDx7AU67YiQt8nbqZmlIJ@qQFVhERJgnjyA/nte7obQ2uBSWVxNvrFcPrsax8s6vhNsa7T+M2iSMM6mmUi@zKJKlGEp5uEMPtlxtb34TQfBcRhTf+G0/yLuuheYMk7hg+s4Fwi72KEXFrp4@hbOp6qi0rIuyKOpTeJ+6/5ueL6xRYeVFbcXLKF8Iq14K6/HjWlhpIvI6naei@/DwIgksJ++ruejqehJPxjYR8YT2K1dp6//WH4LZeWu831x+C6Rj+fvdmBR8j@YPa++nBJGA64TSgKsMNsn6EAXRKOJIxrGNUwR8FcCaM2owrmSphLAMax7Wg8@1w8cmzGJx22PK5jnB+6OH7EJUTCfAR7COCDYsR3gxzgAvcDTQjgQuxKRIi/A@yPaolqI1pBiA2KYSyIjNfAUkLnyzmSQnno2RAlIAeooME8f2NZB5AWG2C2QY@pCNNzr2AEqWmz2yiYH96/MWp+v/tpf8r69+BDnCu/79X/a/O9f8Pqf9ttE7C@WfI7Vf+n6x8ceah/5kL9cwed5/8r1X/SqH9Z57tqf7p+GIVvRy+VHlhPMBKs@908foBBIwHyb479AAp/P71j/0LT/ABmyxl3Oj9Y/dABZ/5QTDE1Azn/iOuRc@/69x0LkE/vX1Hxf5PF2oBqA/vmr9Y8x0/Rvvf+rw8/v/Vc6ljrgFwbcGi6yY@Rdng8jM5EYpcjf37Ik/rorzNa1Fuo8wawGsNNVFCuBwWZRleZ1G5+p/IsuLH@cCpqa0B91MvtcVmKallkSXj/MIqBVMQKZUAP6MMoS2dlJD8/pisBYYJtY0AQ@9q8QuSLeI0b/QSSwqrhM17X15NqODV+/HV7fyS/cxoF18531hG1ks3B68xB+@+fMpvSciCYeZgGQYMNPChwJu0/pjOHm2Bn3w+yIBr/wCl+y4U9fgcid37euF@mIJXxPBjnAkQT0mvAm/TqPqEJGmE8jwjwKER3FK+7yqDWL71GxzuI7CQuUYM@ngAuwvsUIoNsnx8uplmxFuP5PI1TkccfNSk1tf52K8p4A5HN6/B2VSQhxNwa@eKhPgfGzqQAxFFCUCuwd4z0DrxwEYHRMwjfFaieAGyhDMF5GUF+5h4tdpo6i@8ofhTpRCQbD3ndBEa+EYKE+j0US7EPZJAyxf1wpMUNPeR8j1naYnbdG06ERQ@JAZHR0Lez0MboaQ7p2OlLPLQyYRS7M14Kne/3YtwO6kmodjGZvb/KICTiKrN@IRVpW+NDnuCGO6Ptops+XTd00kJHp+0FHUoJJXa7vGrgJ6BdSS3VGl21uFVx@lKkf1ZfpYqnziBk6xUl4Wy9D6BOykMyLVF1oKta6mY41xVUjiAd5xXxeqUbc@uuyBv2igBfWpoCRxdMwudd1j1ouO9BjlMap+TfYXV81aV4xgM20JmSVahNxX@kQ/Pi1bckjiJw2idtMjEcx2mebKBubSF3ivzqo2xL7SmUyZJut1pSHyGOnE5@FhKRy6xp9Pe9JtVmvc5ADm1kvpKkXCtnclvOS1vK0lVaq4ztpCyMhAouYbIb@fnweK0VGIotAoneEJlzLujTKtAZ7HeM7CknTLw9YQvwWCIPyvlmyQIhaVQxo@AKKe10TDuqob6q101zYbzghBydbx8jrLGvN7pAMRPtzhJhzSBWkobrdmmeYP@d2AGszFH1PEch3AjYPCaeZYcQd0ryGnPd4iLkYcob2iEZR9LRD1LaxjopClj@ClWhuqdig23UYB8az6LwnXqvNTiMgHpnAKiJMfGOkysU0vZVv2aPafQuSnc0@tAt/UYX2OZj0OljpRzuq490VMlU/OF9G3WaQCwy8ixzadT5WzkeEMt/1HYih@yagsFhsRFvkGqhvyfrYpq7qj3U4FxnA7bH2J1HUrbrjuRS/pBRsxx/EJo1iu@On32yZi7NuWOByg+c44mB2klh+E+rDoC74seaobokC1IZQtvZcM0/UmoJtB2@jxLB6SkvoIYX1ByfRttmh9t5tfoBfPN8A6cvfVBv+kiFTfcY9qO2/UpMx5Zh@EZWVuElzMZE6y5eQjdBRh+OWww9OxcecilWKd0qs396D8oTIadhsbPoBtIKO@bgyA6fQ2xMxHCbxSQ7lHSRXNprXHqJYbmAWwdclJ6Pdh1PudTA8vt40Ubeoi@E1uRNSI4uQkx56g5yw0nzYoqCqtiU8aiEcYeuWqUmS+cdT5p+bxp8U6e/HnB@p4y7iDYyeI8McWwN1iRRrw9JzTu2bBVf3GZ0wso9Qod0nd++GG8ubiYj5lPs@sL6YmdIwRb1I66iMZkWWxi+YnoMw91vpU6w2xp6QLvIoG4katu7rbZRmnYfH@XZEdVvRYr62kvbVqNtM0X2RiDEMjOc5CPXhMBqYKD0VZq1bR0FjmzQH/v+sk@qoXxs4Hcuc3ucjusSxnOZ/kSYoj5hqsEiD+Q6i26sYMXxfq+nSJ3RdVxgUw1@M+x3AM3B/pZeviF8JKLk+yIXY/kMyyP9K4fpCLUrtLUjxxHalp/2c8MKdavK@hR/1jmLvnrRRq2gaedjq0jytj6vXk0mTZ7lCZ0WU7NGkjqTxnm1Hv+Ok/Ra/@l9/IpXlcpQfkd09TmShzR46v8z+wzud8zuffev4Pz/BaCwAqAAA=@====@
+ethaddr=54:db:a2:10:42:cf
+goi_config2=013072833090929389607
+default_serial=0x48 0x41 0x4c 0x4e 0x10 0x10 0x42 0xcf
+image1_version=V1.0.9
+image1_is_valid=1
+committed_image=1
+sgmii_mode=sgmii_fast_auto
