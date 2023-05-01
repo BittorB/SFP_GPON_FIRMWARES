@@ -1,0 +1,55 @@
+fw_printenv 
+active_image=A
+addip=setenv bootargs ${bootargs} ip=${ipaddr}:${serverip}:${gatewayip}:${netmask}:${hostname}:${netdev}:off
+addmisc=setenv bootargs ${bootargs} ethaddr=${ethaddr} machtype=${machtype} ignore_loglevel vpe1_load_addr=0x83f00000 vpe1_mem=1M mem=63M ${mtdparts}
+addmtdparts0=setenv mtdparts mtdparts=sflash:384k(Boot)ro,64k(Env),3648k(ImageA),3648k(ImageB),0x60000(Config),0x10000(SECTION_EGIS),2624k@1472k(rootfs)
+addmtdparts1=setenv mtdparts mtdparts=sflash:384k(Boot)ro,64k(Env),3648k(ImageA),3648k(ImageB),0x60000(Config),0x10000(SECTION_EGIS),2624k@5120k(rootfs)
+baudrate=115200
+boot_image0=run kernel0_from_sf flashargs addip addmtdparts0 addmisc && bootm ${ram_addr}
+boot_image1=run kernel1_from_sf flashargs addip addmtdparts1 addmisc && bootm ${ram_addr}
+boot_upf=tw-lantiq-falcon_sfp_linux-u-boot-svn12170.upf
+bootcmd=tw_boot
+bootdelay=3
+eeproma0=0304070000000200000000010d000a6400000000486973656e7365202020202020202020000000004c5444313330322d42482b202020202044202020051e006e001a141442313831303430303030392020202020313030343139202044b001a3000000000000000000000000000000000000000000000000000000000000aa00
+eeproma0_1=0304010000000200000000030c0014c8000000005A5958454C000000000000000000000000000000504D47333030302D443230420000000056312E30051e0055
+eeproma0_2=001a000053323034313337353134323533000000313530353235202068f0019d0000000000000000000000000000000000000000000000000000000000000000
+eeproma2=5f00d3005a00d8008ca0753088b87918c35000009c40000015f7031a1394037b18a600321394003f000000000000000000000000000000000000000000000000000000003f8000000000000001000000010000000100000001000000000000dc2d9084600000000000060000000004f80140000001400000
+env_offs=0x60000
+ethact=SGMII
+ethaddr=ac:9a:96:00:00:00
+fileaddr=80F00000
+filesize=2E0200
+flashargs=setenv bootargs rootfstype=squashfs,jffs2
+gphy0_phyaddr=0
+gphy1_phyaddr=1
+image0_addr=0xB0070200
+image0_offs=0x70000
+image1_addr=0xB0400200
+image1_offs=0x400000
+image_name=openwrt-lantiq-falcon-SFP
+image_upf=PON699GA.1L39A-1G-ALU-R01B010D12246-CN.squashfs.upf
+ipaddr=192.168.1.1
+kernel0_from_sf=sf probe 0;sf read ${ram_addr} ${kernel0_offs} ${max_kernel_size}
+kernel0_offs=0x70200
+kernel1_from_sf=sf probe 0;sf read ${ram_addr} ${kernel1_offs} ${max_kernel_size}
+kernel1_offs=0x400200
+load_kernel=tftp ${ram_addr} ${tftppath}${image_name}-uImage
+load_uboot=tftp ${ram_addr} ${tftppath}u-boot.img
+machtype=SFP
+max_kernel_size=180000
+preboot=echo
+ram_addr=80F00000
+save_uboot=sf probe 0;sf erase 0 40000;sf write ${ram_addr} 0 ${filesize}
+serverip=10.10.1.54
+seteeprom=1
+softMode=NORMAL
+stderr=serial
+stdin=serial
+stdout=serial
+update_image0=tftp ${ram_addr} ${tftppath}${image_name}-squashfs.image;sf probe 0;sf erase ${image0_offs} 0x390000;sf write ${ram_addr} ${kernel0_offs} ${filesize};
+update_image1=tftp ${ram_addr} ${tftppath}${image_name}-squashfs.image;sf probe 0;sf erase ${image1_offs} ${filesize};sf write ${ram_addr} ${kernel1_offs} ${filesize}
+update_uboot=run load_uboot save_uboot
+ver=U-Boot 2011.12-lantiq-gpon-1.2.16-gDCC7715 (May 05 2016 - 10:38:33)
+manage_a0=1
+link_status=DOWN
+remote_account_pwd=9b7q7yrugt
