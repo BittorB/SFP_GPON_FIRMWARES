@@ -1,0 +1,10 @@
+root@SFP:/# cat /proc/mtd
+dev:    size   erasesize  name
+mtd0: 00060000 00010000 "Boot"
+mtd1: 00010000 00010000 "Env"
+mtd2: 00390000 00010000 "ImageA"
+mtd3: 00390000 00010000 "ImageB"
+mtd4: 00060000 00010000 "Config"
+mtd5: 00010000 00010000 "SECTION_EGIS"
+mtd6: 00250000 00010000 "rootfs"
+mtd7: 00010000 00010000 "rootfs_data"
