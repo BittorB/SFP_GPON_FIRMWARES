@@ -1,3 +1,3 @@
 # SFP_GPON_FIRMWARES
-Several firmware for gpon stick recopiled from internet and dumps
+Several firmware for SFPgpon stick recopiled from internet and dumps
 
